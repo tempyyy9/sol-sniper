@@ -21,10 +21,12 @@ FIELDS = [
     ("PRIORITY_FEE", "Приоритетная комиссия, SOL (больше = быстрее)", "0.01"),
     ("WINDOW_START", "Начало ожидания, пример 2026-11-01T17:30:00+08:00 (пусто = сразу)", ""),
     ("WINDOW_END", "Конец ожидания (пусто = без конца)", ""),
+    ("TOKEN_KEYWORDS", "Ожидаемое название токена (через запятую)", "catpad"),
+    ("NAME_AUTOBUY", "Покупать по названию до поста? off (только уведомить) / channel_link / any", "off"),
     ("DRY_RUN", "Тестовый режим без покупки? true / false", "true"),
 ]
 FIXED = {"EXTRA_SEND_URLS": "", "POOL": "auto", "REQUIRE_PUMP_SUFFIX": "false",
-         "POLL_INTERVAL": "1.0", "MAX_ATTEMPTS": "4", "SESSION_NAME": "sniper"}
+         "POLL_INTERVAL": "1.0", "MAX_ATTEMPTS": "4", "SESSION_NAME": "sniper", "SCOUT": "true"}
 
 print("Отвечай на вопросы. Enter — оставить значение в [скобках].\n")
 vals = {}

@@ -37,6 +37,10 @@ WINDOW_END = os.getenv("WINDOW_END", "")
 POLL_INTERVAL = float(os.getenv("POLL_INTERVAL", "1.0"))  # подстраховка опросом, сек (0 = выкл)
 MAX_ATTEMPTS = int(os.getenv("MAX_ATTEMPTS", "4"))
 SESSION = os.getenv("SESSION_NAME", "sniper")
+# Разведка по названию: off = только уведомлять; channel_link = покупать, если название совпало И в метаданных ссылка на канал;
+# any = покупать первый новый токен с таким названием (ОПАСНО: подделки)
+NAME_AUTOBUY = os.getenv("NAME_AUTOBUY", "off")
+SCOUT = os.getenv("SCOUT", "true").lower() == "true"
 
 PUMPPORTAL_URL = "https://pumpportal.fun/api/trade-local"
 
@@ -277,6 +281,22 @@ async def main():
     if bal < BUY_AMOUNT_SOL + PRIORITY_FEE + 0.01:
         await notify("⚠️ Баланса не хватит на покупку + комиссии!")
     asyncio.create_task(poller())
+
+    if SCOUT:
+        import scout
+        http = httpx.AsyncClient()
+        for kw in scout.KEYWORDS:
+            await notify(scout.format_scan(kw, await scout.scan_existing(http, kw)))
+
+        async def on_name_match(t, meta):
+            await notify(scout.format_new(t, meta))
+            if buyer.bought or not in_window():
+                return
+            if NAME_AUTOBUY == "any" or (NAME_AUTOBUY == "channel_link" and scout.links_point_to_channel(meta)):
+                await notify(f"⚡ Покупаю по названию ({NAME_AUTOBUY})")
+                await buyer.buy(t["mint"], notify)
+
+        asyncio.create_task(scout.watch_new_tokens(on_name_match))
     await client.run_until_disconnected()
 
 
